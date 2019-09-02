@@ -55,9 +55,8 @@ class Watcher:
     def run(self):
         for response in self.__watcher_iter:
             self.__on_events([
-                KVEvent(evt.key, KVEvent.ACTION_DELETE
-                if isinstance(evt, etcd3.events.DeleteEvent)
-                else KVEvent.ACTION_UPDATE, evt.value) for evt in response.events], response.header.revision)
+                KVEvent(evt.key, KVEvent.ACTION_DELETE if isinstance(evt, etcd3.events.DeleteEvent)
+                else KVEvent.ACTION_UPDATE, evt.mod_revision, evt.value) for evt in response.events], response.header.revision)
 
     def __on_events(self, events, revision):
         def action_string(action):
@@ -72,10 +71,15 @@ class Watcher:
             message(action_string(event.action))
 
             if event.action == KVEvent.ACTION_UPDATE:
-                message('key: ' + event.key.decode('ascii') + ' value: ' + event.value.decode('ascii'))
+                message('key: {0} value: {1} header revision: {2} modified revision: {3}'
+                        .format(event.key.decode('ascii'),
+                                event.value.decode('ascii'),
+                                revision,
+                                event.mod_revision))
 
             else:
-                message('key: ' + event.key.decode('ascii'))
+                message('key: {0} header revision: {1} modified revision: {2}'
+                        .format(event.key.decode('ascii'), revision, event.mod_revision))
 
     def __perform_test(self, *args):
         if self.__test is not None:

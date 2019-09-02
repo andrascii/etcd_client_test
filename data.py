@@ -15,13 +15,18 @@ class KVEvent(object):
             return "", ""
         return v[0 : idx], v[idx + 1 :]
 
-    def __init__(self, key, action, value = None):
+    def __init__(self, key, action, mod_revision, value = None):
         self.key = key
         self.action = action
+        self.modified_revision = mod_revision
         self.value = value
 
     def __repr__(self):
         return "(%s, %s, %s)" % (self.key, self.action, self.value)
+
+    @property
+    def mod_revision(self):
+        return self.modified_revision
 
     @property
     def value_src(self):
